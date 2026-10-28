@@ -6,6 +6,22 @@
 本流水线的画面是 HTML/CSS 渲染的**信息卡**——结论卡、数字滚动网格、编号步骤、真实截图嵌入。
 适合知识/数据/实测类口播；现金成本 ≈ 0（仅 TTS 字符费）。
 
+## 给 Agent 的安装说明（Agent 自己装，不用人动手）
+
+这是一个标准的 **SKILL.md 技能包**：目录里有 `SKILL.md`（元数据 + 七步执行指令），
+任何会读文件的 agent 都能自行安装并执行。给 agent 的完整指令如下，可直接整段粘贴给 agent：
+
+> 请把技能 infocard-video 安装到本机技能目录并验证可用：
+> 1. 克隆仓库：`git clone https://github.com/lmxcode/infocard-video`（Windows 下若网络受限，加代理配置）
+> 2. 把整个 `infocard-video/` 目录放入本机技能目录：
+>    - WorkBuddy：`~/.workbuddy/skills/infocard-video/`（Windows 为 `C:\Users\<你>\.workbuddy\skills\infocard-video\`）
+>    - 其他读 SKILL.md 约定的 agent：放入其技能/插件目录即可
+> 3. 验证安装：`infocard-video/SKILL.md`、`scripts/`（6 个脚本）、`templates/`（3 个模板）三者齐全
+> 4. 依赖检查：`ffmpeg -version` 可用；本机有 Edge/Chrome/Chromium；环境变量 `MINIMAX_API_KEY` 已设置（缺哪项告知用户怎么补）
+> 5. 回复用户安装完成。之后用户说「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 信息卡视频」等即触发本技能，按 SKILL.md 的七步流程执行
+
+安装后无需任何 pip install——脚本全部只用 Python 标准库。
+
 ## 快速开始
 
 ```bash
