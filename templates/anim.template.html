@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!--
+  anim.template.html — 信息卡竖版画面模板（暖纸风）
+
+  核心机制：本文件是 ?t= 的纯函数 —— 同一个 t 永远渲染出同一帧。
+  render_frames.py 按 fps×duration 逐帧以 ?t=秒数 截图；retime.py 会把
+  实测口播切点写回 <script> 里的 cuts 数组（只需保证 id=cuts 存在）。
+
+  场景结构：
+    .scene  = 一个场景（对应 cuts 里相邻两个切点之间的时间段）
+    .a      = 场景内依次入场的元素，data-d = 相对场景切入点的延迟秒数
+    .card/.cardc/.stat/.badge/.shot = 现成卡片样式（信息卡/强调卡/数字卡/徽章/截图）
+    cnt(a,b,t0,t1) = 数字滚动：元素 textContent 从 a 滚到 b
+
+  使用：复制本文件为 anim.html，改掉 {{BRAND}} 和场景内容，删掉多余场景，
+  让 .scene 的数量 = cuts 数组长度 - 1。
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;background:#FAF7F2;
+ color:#2A2622;font-family:'Microsoft YaHei','PingFang SC',sans-serif;overflow:hidden;position:relative}
+.tag{position:absolute;top:96px;left:72px;font-size:34px;letter-spacing:6px;color:#C96442;font-weight:600}
+.foot{position:absolute;bottom:200px;left:0;right:0;text-align:center;font-size:26px;color:#A8A29A;letter-spacing:3px;opacity:.6}
+.cyan{color:#C96442}.blue{color:#5E6E8C}.amber{color:#A16207}.red{color:#C2410C}.green{color:#15803D}
+.mono{font-family:Consolas,Menlo,monospace}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 72px 120px;opacity:0}
+.card{background:rgba(94,110,140,.07);border:2px solid #E3DCCE;border-radius:24px;padding:42px 44px;margin-top:28px}
+.cardc{background:rgba(201,100,66,.07);border:2px solid #C96442;border-radius:24px;padding:42px 44px;margin-top:28px}
+.a{opacity:0;will-change:transform,opacity}
+#pbar{position:absolute;top:0;left:0;height:10px;background:#C96442;border-radius:0 6px 6px 0;width:0}
+.badge{display:inline-block;background:#C96442;color:#FFF7F0;border-radius:18px;padding:18px 40px;font-size:42px;font-weight:800;align-self:flex-start}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:28px}
+.stat{background:rgba(94,110,140,.07);border:2px solid #E3DCCE;border-radius:24px;padding:38px 20px;text-align:center}
+.shot{border:3px solid #E3DCCE;border-radius:20px;overflow:hidden;margin-top:28px;background:#fff}
+.shot img{width:100%;display:block}
+.date{display:inline-block;background:rgba(42,38,34,.08);color:#5E6E8C;border-radius:14px;padding:10px 26px;font-size:34px;font-weight:700}
+.num{display:inline-block;width:52px;height:52px;line-height:52px;text-align:center;border-radius:50%;
+ background:#C96442;color:#FFF7F0;font-size:30px;font-weight:800;margin-right:16px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+<div class="tag">{{BRAND}}</div>
+
+<!-- 场景 1 · 钩子：一句大字 + 一个强调卡 -->
+<div class="scene" id="s0">
+  <div class="a" data-d="-0.12" style="font-size:64px;font-weight:800;line-height:1.5">钩子标题：<span class="cyan">一行说清冲突</span></div>
+  <div class="a" data-d="0.5"><div class="cardc" style="font-size:40px">一句话补充<br>把「为什么值得看」讲透</div></div>
+</div>
+
+<!-- 场景 2 · 论据：数字卡网格（数字可滚动，见脚本 cnt()） -->
+<div class="scene" id="s1">
+  <div class="a" data-d="-0.12" style="font-size:56px;font-weight:800">先算一笔账</div>
+  <div class="a" data-d="0.4"><div class="grid">
+    <div class="stat"><div style="font-size:56px;font-weight:900" class="cyan"><span id="num1">0</span></div><div style="font-size:26px;color:#5E6E8C;margin-top:8px">指标一</div></div>
+    <div class="stat"><div style="font-size:56px;font-weight:900"><span id="num2">0</span></div><div style="font-size:26px;color:#5E6E8C;margin-top:8px">指标二</div></div>
+    <div class="stat"><div style="font-size:56px;font-weight:900" class="green"><span id="num3">0</span></div><div style="font-size:26px;color:#5E6E8C;margin-top:8px">指标三</div></div>
+    <div class="stat"><div style="font-size:56px;font-weight:900" class="red"><span id="num4">0</span></div><div style="font-size:26px;color:#5E6E8C;margin-top:8px">指标四</div></div>
+  </div></div>
+</div>
+
+<!-- 场景 3 · 步骤：编号列表卡 -->
+<div class="scene" id="s2">
+  <div class="a" data-d="-0.12" style="font-size:56px;font-weight:800;margin-bottom:30px">怎么做到的</div>
+  <div class="a" data-d="0.3"><div class="card" style="font-size:38px"><span class="num">1</span>第一步，一句话说清</div></div>
+  <div class="a" data-d="0.9"><div class="card" style="font-size:38px"><span class="num">2</span>第二步，一句话说清</div></div>
+  <div class="a" data-d="1.5"><div class="card" style="font-size:38px"><span class="num">3</span>第三步，一句话说清</div></div>
+</div>
+
+<!-- 场景 4 · 收尾：引导关注 + 互动 -->
+<div class="scene" id="s3">
+  <div class="a" data-d="-0.12" style="font-size:64px;font-weight:800;line-height:1.5">完整配置<br>在<span class="cyan">评论区</span>直接抄</div>
+  <div class="a badge" data-d="0.45" style="margin-top:52px">关注我 · 下一条实测更新</div>
+  <div class="a" data-d="0.8" style="margin-top:36px;font-size:40px;color:#6B655C">一个互动问题<br>评论区报个数 👇</div>
+</div>
+
+<div class="foot">{{BRAND}}</div>
+<script>
+const qs=new URLSearchParams(location.search);
+const t=parseFloat(qs.get('t')||'0');
+const scenes=[...document.querySelectorAll('.scene')];
+/* cuts 由 retime.py 按实测口播时长自动重写；初始值按 config.duration 均分占位 */
+const cuts=[0,11,22,33,45];
+let si=0;for(let k=0;k<cuts.length-1;k++){if(t>=cuts[k]&&t<cuts[k+1]){si=k;break}}
+document.getElementById('pbar').style.width=(t/cuts[cuts.length-1]*100).toFixed(2)+'%';
+function ease3(p){return 1-Math.pow(1-p,3)}
+scenes.forEach((s,k)=>{
+  let op=0;
+  if(k===si)op=1;
+  else if(k===si-1&&si>0)op=Math.max(0,1-(t-cuts[si])/0.35);
+  s.style.opacity=op.toFixed(3);
+  if(k===si){
+    s.querySelectorAll('.a').forEach(el=>{
+      const d=parseFloat(el.dataset.d||'0');
+      const p=Math.min(Math.max((t-cuts[si]-d)/0.5,0),1);
+      const e=ease3(p);
+      el.style.opacity=e.toFixed(3);
+      el.style.transform=`translateY(${((1-e)*44).toFixed(1)}px)`;
+    });
+  }
+});
+/* 数字滚动：cnt(起始值, 终值, 开始秒, 结束秒)。t0/t1 相对全局时间，可用 cuts[i]+偏移 */
+function cnt(a,b,t0,t1){const p=Math.min(Math.max((t-t0)/(t1-t0),0),1);const e=1-Math.pow(1-p,2);return a+(b-a)*e}
+/* 示例：场景 2 切入后 1.6s 起，四个数字依次滚动到目标值（改成你的真实数据） */
+const targets={num1:100,num2:1000,num3:500,num4:6500};
+Object.keys(targets).forEach((id,i)=>{
+  const el=document.getElementById(id);
+  if(el)el.textContent=Math.round(cnt(0,targets[id],cuts[1]+1.0+i*0.5,cuts[1]+3.6+i*0.5)).toLocaleString();
+});
+</script>
+</body>
+</html>

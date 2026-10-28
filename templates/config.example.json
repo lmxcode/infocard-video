@@ -1,0 +1,43 @@
+{
+  "title": "my-infocard-video",
+  "width": 1080,
+  "height": 1920,
+  "fps": 15,
+  "duration": 45,
+  "browser": "auto",
+  "cuts": [0, 5, 20, 38, 45],
+  "mix": {
+    "bgm_volume": 0.22,
+    "voice_gain_db": 3.5,
+    "limiter": 0.95
+  },
+  "tts": {
+    "model": "speech-2.8-hd",
+    "speed": 1.15,
+    "voice_id": "female-shaonv",
+    "volume": 3.0,
+    "language_boost": "Chinese",
+    "text_normalization": true,
+    "pronunciation_dict": {
+      "tone": [
+        "API/(A)(P)(I)"
+      ]
+    }
+  },
+  "bgm": {
+    "chords": [
+      [220.0, 261.63, 329.63],
+      [174.61, 220.0, 261.63],
+      [196.0, 246.94, 293.66],
+      [164.81, 220.0, 261.63]
+    ],
+    "chord_step": 2.5,
+    "pad_amp_default": 0.1,
+    "beat": 999,
+    "sections": [{ "from": 0, "to": 0.01, "kick_amp": 0 }],
+    "clicks": {},
+    "impacts": [],
+    "risers": [],
+    "fade_out_at": 43.5
+  }
+}
