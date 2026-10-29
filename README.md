@@ -1,6 +1,6 @@
 # infocard-video · 信息卡短视频流水线
 
-把一段口播稿变成一条 **1080×1920 竖版成片**：TTS 口播 + 品牌信息卡画面 + BGM + 字幕，全自动七步。
+把一段口播稿变成一条 **1080×1920 竖版成片**：TTS 口播 + 品牌信息卡画面 + BGM + 字幕，全自动八步（含自动质检）。
 
 **定位**：与素材库拼贴类工具（配城市航拍空镜的那种）和生成式视频包装器（按秒烧钱的 Veo/Runway 壳）不同，
 本流水线的画面是 HTML/CSS 渲染的**信息卡**——结论卡、数字滚动网格、编号步骤、真实截图嵌入。
@@ -19,9 +19,13 @@
 > 2. 把整个 `infocard-video/` 目录放入本机技能目录：
 >    - WorkBuddy：`~/.workbuddy/skills/infocard-video/`（Windows 为 `C:\Users\<你>\.workbuddy\skills\infocard-video\`）
 >    - 其他读 SKILL.md 约定的 agent：放入其技能/插件目录即可
-> 3. 验证安装：`infocard-video/SKILL.md`、`scripts/`（6 个脚本）、`templates/`（3 个模板）三者齐全
+> 3. 验证安装：`infocard-video/SKILL.md`、`scripts/`（7 个脚本，含 qa_check.py）、`templates/`（3 个模板）三者齐全
 > 4. 依赖检查：`ffmpeg -version` 可用；本机有 Edge/Chrome/Chromium；环境变量 `MINIMAX_API_KEY` 已设置（缺哪项告知用户怎么补）
-> 5. 回复用户安装完成。之后用户说「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 信息卡视频」等即触发本技能，按 SKILL.md 的七步流程执行
+> 5. 自检：`python scripts/qa_check.py` 需在流水线工作目录运行（安装期可跳过）；`python tests/test_qa_check.py` 应 5 项全过
+> 6. 回复用户安装完成。之后用户说「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 信息卡视频」等即触发本技能，按 SKILL.md 的八步流程执行
+
+也可以用 skills CLI 安装（支持 Claude Code / Codex / OpenCode 等）：
+`npx skills add lmxcode/infocard-video`
 
 安装后无需任何 pip install——脚本全部只用 Python 标准库。
 

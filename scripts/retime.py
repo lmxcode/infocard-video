@@ -73,6 +73,14 @@ def main():
         vmp.write_text(json.dumps(vmeta, ensure_ascii=False, indent=2), encoding="utf-8")
         print("voice_meta anchors synced")
 
+    # 同步 config.json 的 cuts（v1.0.3：config 也是消费方——mix/bgm 读它，不同步会出现两套切点）
+    cp = here / "config.json"
+    if cp.exists():
+        cfg = json.loads(cp.read_text(encoding="utf-8"))
+        cfg["cuts"] = cuts
+        cp.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print("config.json cuts synced")
+
     # 改写 html 里的 cuts
     hp = here / args.html
     if hp.exists():
@@ -86,6 +94,14 @@ def main():
     for s, a in zip(segs, anchors):
         print(f"  {s['name']:<10} anchor={a:6.2f} dur={dur[s['name']]:5.2f} end={a + dur[s['name']]:6.2f}")
     print("cuts:", [f"{c:g}" for c in cuts])
+
+    # 空档预算告警（吸收 anatomy qa 思路：不放宽检查，先提示）
+    if gaps and min(gaps) < 0.25:
+        print(f"⚠️ 最小空档 {min(gaps):.2f}s < 0.25s，节奏偏赶。建议：①精简最长段的文案 ②提 config.duration")
+    ratio = speech / total
+    if ratio > 0.9:
+        print(f"⚠️ 口播占片长 {ratio:.0%}，几乎没有呼吸空间。建议删 1 段或提 duration；"
+              f"若实长超出目标 30%+，先精简稿子再重合成（时长推演不可信）")
 
 
 if __name__ == "__main__":

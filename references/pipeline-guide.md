@@ -75,3 +75,28 @@ voice_meta ──subgen──▶ subs.ass ──ffmpeg ass 烧录──▶ outpu
 | 成片有音无画/花屏 | 检查 frames 帧数 = duration×fps，缺帧续渲 |
 | 字幕与口播错位 | voice_meta 的 anchor 是否为 retime 后的值（见坑 3） |
 | BGM 盖过人声 | 降 `bgm_volume` 到 0.15-0.18 |
+
+## 六、自动质检（v1.0.3，`scripts/qa_check.py`）
+
+时间线检查渲染前就能跑；`--media` 连成片一起验（从 MP4 本身抽验，不是只看中间帧）。
+退出码 0=过 / 1=有 FAIL / 2=目录不对。**交付说明里写明哪些项没跑。**
+
+| # | 检查 | 不通过怎么办 |
+|---|---|---|
+| T1 | voice/ 音频文件齐全 | 重跑 gen_voice（reuse 不重复计费） |
+| T2/T2b | 段间无重叠；最小空档 <0.25s 给 WARN | 重跑 retime；仍赶则精简文案或提 duration |
+| T3 | 每个内部切点 = 锚点-0.12（±0.15s） | 重跑 retime（v1.0.3 起会同步 config/html/voice_meta 三处） |
+| T4 | duration ≥ 末段结束+0.15s | 提 config.duration |
+| T5 | 每段音频结束 ≤ 下一切点（字幕不跨切点） | 重跑 retime；仍跨则拆段 |
+| T6 | anim html 的 cuts 与 config 一致 | 重跑 retime --html |
+| M1-M3 | 成片时长 ±0.6s / 分辨率 / 音轨 mean -30~-8dB | 按修法处理（时长差大=duration 改过没重渲；电平异常查 mix） |
+
+人工兜底：qa_check 全过后仍抽 3-5 帧看排版/字号——程序查不到「好不好看」。
+
+## 七、参数补充（v1.0.3）
+
+- `bgm.cut_fx`：`"thud"`（默认，每个内部切点落一记闷响）/ `"full"`（thud+切换前 0.45s 呼啸）/ `"none"`
+- `bgm.bpm`：给了就走节拍网格（beat=60/bpm），底鼓踩格子
+- 母带：归一化后 tanh 软限幅再归一 0.85——防削波爆音
+- 多比例：`width/height` 本来就是参数；16:9 用 1920×1080，场景排版需同步改
+- `retime.py` v1.0.3 同步四处：segments.json、voice_meta.json、config.json、html cuts——不再有两套切点

@@ -2,10 +2,10 @@
 name: infocard-video
 display_name: 信息卡短视频流水线
 display_name_en: Infocard Short-Video Pipeline
-description: 信息卡短视频全自动流水线 Skill。当用户说「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 竖版视频 / 抖音视频 / 视频成片 / 信息卡视频 / 数字滚动视频 / TTS 口播 / 克隆音色做视频 / 自动配音 / 自动字幕 / 加 BGM」时使用。输入一段口播稿或主题 → 全自动七步产出 1080×1920 竖版成片：分段脚本 → 逐段 TTS 口播（MiniMax，支持克隆音色）→ 按实测时长重排切点 → 无头浏览器逐帧渲染信息卡画面（HTML/CSS 品牌风，数据动画+真实截图，不用素材库不烧生成模型）→ 和弦垫底 BGM → 混音 → ASS 字幕烧录。仅依赖 Python 标准库 + ffmpeg + 本机 Edge/Chrome；现金成本 ≈ 0（仅 TTS 按字符计费）。
+description: 信息卡短视频全自动流水线 Skill。当用户要「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 配音视频 / 竖版视频 / 抖音视频 / 视频成片 / 自动字幕 / 自动配音 / TTS 口播 / 克隆音色做视频 / 加 BGM / 数据讲解视频 / 账单视频 / 教程视频 / 科普解说视频 / 数字滚动动画 / 图文转视频」时使用——即使用户没说「信息卡」三个字，只要是文字稿→带配音字幕的成片需求就该用本技能。输入一段口播稿或主题 → 全自动八步产出 1080×1920 竖版成片（16:9 等其他比例改 config width/height 即可）：分段脚本 → 逐段 TTS 口播（MiniMax，支持克隆音色）→ 按实测时长重排切点 → 无头浏览器逐帧渲染信息卡画面（HTML/CSS 品牌风，数据动画+真实截图，不用素材库不烧生成模型）→ 和弦垫底 BGM（切点自动落音效）→ 混音 → ASS 字幕烧录 → 自动质检（时间线/成片/音量 9 项）。仅依赖 Python 标准库 + ffmpeg + 本机 Edge/Chrome；现金成本 ≈ 0（仅 TTS 按字符计费，自动记账）。
 description_en: Fully automated 1080x1920 portrait short-video pipeline. Input a voiceover script or topic, produce a finished video in seven steps: segmented script, per-segment MiniMax TTS (voice cloning supported), retime cuts from measured audio durations, headless-browser frame-by-frame rendering of HTML/CSS infocard scenes (brand-styled data animations and real screenshots, no stock footage, no generative video models), chord-pad BGM, audio mixing, and ASS subtitle burn-in. Requires only Python stdlib, ffmpeg, and a local Edge/Chrome.
 category: 视频
-version: 1.0.2
+version: 1.0.3
 author: 梦幻青山的AI说
 agent_created: true
 ---
@@ -45,17 +45,20 @@ agent_created: true
 | 5 BGM | `python scripts/make_bgm.py --config config.json` | 产出 `bgm.wav`（和弦垫底，自动随 config 长度） |
 | 6 混音 | `python scripts/mix_final.py --config config.json --out output/final.mp4` | 口播按锚点 adelay 对齐 + BGM 压底 + limiter。**不含字幕** |
 | 7 字幕烧录 | `python scripts/subgen.py --out subs.ass` 然后 `ffmpeg -i output/final.mp4 -vf "ass=subs.ass" -c:a copy output/final_subbed.mp4` | 字幕是**独立步骤**，别漏；`DISPLAY` 字典可做 TTS 写法→字幕写法的替换 |
+| 8 自动质检 | `python scripts/qa_check.py --media` | 时间线 6 项 + 成片 3 项（时长/分辨率/音量，从 MP4 本身验证）；退出码非 0 按「修法」处理后重跑 |
 
-成片 = `output/final_subbed.mp4`。质检：抽 3-5 帧看关键场景（`ffmpeg -ss 秒数 -i 成片 -frames:v 1 qc.png`），
-再用 `volumedetect` 验音轨（mean 约 -18dB、max ≤ -0.1dB 为正常）。
+成片 = `output/final_subbed.mp4`。qa_check 全过后再人工抽 3-5 帧看关键场景（`ffmpeg -ss 秒数 -i 成片 -frames:v 1 qc.png`）
+兜底视觉问题（排版/字号）。**交付说明里写明哪些检查项没跑**（如未跑 --media 就说明成片项未验证）。
 
 ## agent 执行要点（实测踩出来的）
 
 - **时长必须实测**：TTS 实测时长可比推演长 30%+。先 gen_voice 再 retime，永远不要先手排切点
+- **时长超了怎么办**：实长超目标 30%+ 时先精简稿子重合成，不要硬压停顿；retime 会打印空档预算告警（最小空档 <0.25s = 节奏偏赶），照告警处理
 - **分段稿口播友好**：数字读慢是正常的；长句拆段，别一段塞三句
 - **画面 = 内容，不是装饰**：信息卡直接放结论/数据/截图，每场景一个主张；`.a data-d` 依次入场
 - **字幕底部避让**：抖音/视频号文案区在底部，模板已避让 200px，别改小
-- **渲染放后台**：900+ 帧要半小时，后台跑期间可并行做 BGM/字幕
+- **渲染放后台**：900+ 帧要半小时（约每秒成片 30 秒渲染，15fps），后台跑期间可并行做 BGM/字幕；帧已存在会跳过，断点续渲
+- **多比例**：config width/height 是参数——16:9 横版用 1920×1080（场景排版需同步调整），9:16 之外的比例先改 config 再渲染
 - **改单段文案**：只重跑 gen_voice 对应段 + retime + 受影响帧删除后续渲，不必全量重来
 
 ## 安全与凭据

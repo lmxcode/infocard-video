@@ -1,0 +1,31 @@
+{
+  "evals": [
+    {
+      "prompt": "帮我把这段稿子做成一条竖版短视频：（一段 300 字口播稿）",
+      "expect": [
+        "建独立工作目录，从 templates/ 复制三件套",
+        "先 gen_voice 实测时长，绝不用推演值排切点",
+        "retime 后 config.duration 覆盖末段结束+1s 以上",
+        "渲染放后台，并行做 BGM/字幕",
+        "产出 output/final_subbed.mp4 且 qa_check --media 全过",
+        "汇报里给出 TTS 计费金额（tts_billing.json）与未验证项说明"
+      ]
+    },
+    {
+      "prompt": "做一条 16:9 横版的讲解视频，画面要放我的产品截图",
+      "expect": [
+        "识别为横版：config 改 1920x1080 并调整场景排版",
+        "截图走 file:// 真实嵌入，不做素材库拼贴",
+        "其余流程与竖版一致，qa_check M2 校验分辨率"
+      ]
+    },
+    {
+      "prompt": "视频做好了但字幕和声音对不上，帮我修",
+      "expect": [
+        "先跑 qa_check.py 定位：T2/T3/T5 三项覆盖声画错位的最常见原因",
+        "检查 retime 是否跑过、voice_meta 锚点是否与 html cuts 同步",
+        "修复后重跑受影响步骤而非全量重渲"
+      ]
+    }
+  ]
+}

@@ -133,6 +133,8 @@ def main():
 
     # ---------- 底鼓 / 镲（从第一处 sections 起拍） ----------
     beat = bg.get("beat", 0.6)
+    if bg.get("bpm"):                       # v1.0.3: 给 bpm 就按节拍网格走（60/bpm）
+        beat = 60.0 / float(bg["bpm"])
     tb = sections[0]["from"] if sections else cuts[1] if len(cuts) > 1 else 0
     while tb < (sections[-1]["to"] if sections else DUR):
         amp = 0.22
@@ -179,6 +181,14 @@ def main():
     for ri in bg.get("risers", []):
         riser(ri["t"], ri.get("dur", 1.0), ri.get("amp", 0.05))
 
+    # ---------- 切点音效（v1.0.3：场景切换自动落 thud / whoosh，默认 thud） ----------
+    cut_fx = bg.get("cut_fx", "thud")
+    if cut_fx != "none":
+        for c in cuts[1:-1]:
+            if cut_fx == "full":
+                riser(max(0.0, c - 0.5), 0.45, 0.035)  # 甩镜前的呼啸上升
+            impact(c - 0.05, 0.10)                     # 切换落位闷响
+
     # ---------- 主控 ----------
     fade_in = int(0.25 * SR)
     L[:fade_in] *= np.linspace(0, 1, fade_in)
@@ -188,8 +198,12 @@ def main():
     L[fo0:] *= np.linspace(1, 0, fo)
     R[fo0:] *= np.linspace(1, 0, fo)
     peak = max(np.abs(L).max(), np.abs(R).max())
-    L *= 0.80 / peak
-    R *= 0.80 / peak
+    if peak > 0:
+        L /= peak
+        R /= peak
+    # v1.0.3 软限幅：tanh 防削波爆音（吸收 iso-explode 母带链思路），再归一到 0.85
+    L = np.tanh(L * 1.2) / np.tanh(1.2) * 0.85
+    R = np.tanh(R * 1.2) / np.tanh(1.2) * 0.85
     st = np.stack([L, R], axis=1)
     pcm = (st * 32767).astype(np.int16)
 
