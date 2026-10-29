@@ -5,7 +5,7 @@ display_name_en: Infocard Short-Video Pipeline
 description: 信息卡短视频全自动流水线 Skill。当用户说「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 竖版视频 / 抖音视频 / 视频成片 / 信息卡视频 / 数字滚动视频 / TTS 口播 / 克隆音色做视频 / 自动配音 / 自动字幕 / 加 BGM」时使用。输入一段口播稿或主题 → 全自动七步产出 1080×1920 竖版成片：分段脚本 → 逐段 TTS 口播（MiniMax，支持克隆音色）→ 按实测时长重排切点 → 无头浏览器逐帧渲染信息卡画面（HTML/CSS 品牌风，数据动画+真实截图，不用素材库不烧生成模型）→ 和弦垫底 BGM → 混音 → ASS 字幕烧录。仅依赖 Python 标准库 + ffmpeg + 本机 Edge/Chrome；现金成本 ≈ 0（仅 TTS 按字符计费）。
 description_en: Fully automated 1080x1920 portrait short-video pipeline. Input a voiceover script or topic, produce a finished video in seven steps: segmented script, per-segment MiniMax TTS (voice cloning supported), retime cuts from measured audio durations, headless-browser frame-by-frame rendering of HTML/CSS infocard scenes (brand-styled data animations and real screenshots, no stock footage, no generative video models), chord-pad BGM, audio mixing, and ASS subtitle burn-in. Requires only Python stdlib, ffmpeg, and a local Edge/Chrome.
 category: 视频
-version: 1.0.1
+version: 1.0.2
 author: 梦幻青山的AI说
 agent_created: true
 ---

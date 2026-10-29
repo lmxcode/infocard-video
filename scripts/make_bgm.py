@@ -44,9 +44,9 @@ def main():
 
     def env_ad(n, a, d):
         e = np.ones(n)
-        na = max(1, int(a * SR))
+        na = min(max(1, int(a * SR)), n)          # 2026-10-29 fix: 信号短于包络时长时夹取，防广播错位
         e[:na] = np.linspace(0, 1, na)
-        nd = max(1, int(d * SR))
+        nd = min(max(1, int(d * SR)), n)
         e[-nd:] *= np.linspace(1, 0, nd)
         return e
 
