@@ -6,6 +6,9 @@
 本流水线的画面是 HTML/CSS 渲染的**信息卡**——结论卡、数字滚动网格、编号步骤、真实截图嵌入。
 适合知识/数据/实测类口播；现金成本 ≈ 0（仅 TTS 字符费）。
 
+> 🧬 **前身**：[lmxcode/anim-forge](https://github.com/lmxcode/anim-forge)（脚本版，clone 后自己跑 Python）。
+> 本仓库是它的技能包形态：agent 读 SKILL.md 自动执行，并新增 retime 字幕锚点自动同步、TTS 自动记账两个升级。
+
 ## 给 Agent 的安装说明（Agent 自己装，不用人动手）
 
 这是一个标准的 **SKILL.md 技能包**：目录里有 `SKILL.md`（元数据 + 七步执行指令），
