@@ -5,7 +5,7 @@ display_name_en: Infocard Short-Video Pipeline
 description: 信息卡短视频全自动流水线 Skill。当用户要「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 配音视频 / 竖版视频 / 抖音视频 / 视频成片 / 自动字幕 / 自动配音 / TTS 口播 / 克隆音色做视频 / 加 BGM / 数据讲解视频 / 账单视频 / 教程视频 / 科普解说视频 / 数字滚动动画 / 图文转视频」时使用——即使用户没说「信息卡」三个字，只要是文字稿→带配音字幕的成片需求就该用本技能。输入一段口播稿或主题 → 全自动八步产出 1080×1920 竖版成片（16:9 等其他比例改 config width/height 即可）：分段脚本 → 逐段 TTS 口播（MiniMax，支持克隆音色）→ 按实测时长重排切点 → 无头浏览器逐帧渲染信息卡画面（HTML/CSS 品牌风，数据动画+真实截图，不用素材库不烧生成模型）→ 和弦垫底 BGM（切点自动落音效）→ 混音 → ASS 字幕烧录 → 自动质检（时间线/成片/音量 9 项）。仅依赖 Python 标准库 + ffmpeg + 本机 Edge/Chrome；现金成本 ≈ 0（仅 TTS 按字符计费，自动记账）。
 description_en: Fully automated 1080x1920 portrait short-video pipeline. Input a voiceover script or topic, produce a finished video in seven steps: segmented script, per-segment MiniMax TTS (voice cloning supported), retime cuts from measured audio durations, headless-browser frame-by-frame rendering of HTML/CSS infocard scenes (brand-styled data animations and real screenshots, no stock footage, no generative video models), chord-pad BGM, audio mixing, and ASS subtitle burn-in. Requires only Python stdlib, ffmpeg, and a local Edge/Chrome.
 category: 视频
-version: 1.0.6
+version: 1.1.0
 author: 梦幻青山的AI说
 agent_created: true
 ---
@@ -56,6 +56,13 @@ agent_created: true
 - **时长必须实测**：TTS 实测时长可比推演长 30%+。先 gen_voice 再 retime，永远不要先手排切点
 - **过渡效果已内置（v1.0.6）**：模板入场/淡出自带自适应运动模糊（位移越大越糊，到位即清），不需要手工加；过渡帧发糊是正常的，稳定帧必然清晰——qa 抽帧时过渡帧（切点后 0.5s 内）不算糊
 - **多比例（v1.0.6）**：横版 16:9 改模板 :root 的 `--vw:1920px;--vh:1080px` + config 的 `width/height`，布局改两栏、字号降一档（64→52 级）；渲染/QA 脚本不用改
+- **动画叙事引擎（v1.1.0，硬要求）**：
+  - 入场动作：.a 加 `data-motion="up|left|right|pop|zoom"`——钩子大字/大数字用 pop（弹性过冲），重磅结论用 zoom，列表用 right，不要全片只用 up
+  - 转场：.scene 加 `data-trans="fade|slide|whip|zoom"`——证据幕用 zoom（推近=放大看），节奏强切用 whip（甩镜），同向转场不连用两次
+  - Ken Burns：.shot 截图自动缓慢推近，证据截图不再静态贴片；不用则 data-kb="0"
+  - 证据强调：SVG 红框 dl('id',t0,t1) 随口播画线——**口播念到哪行，框画到哪行**，时机对齐 voice_meta 实测时间戳
+  - 条形生长 grow() / CTA 脉冲 pulse()
+- **分镜先行（v1.1.0 硬要求）**：写 anim.html 前先出分镜表（每幕：口播要点/画面/动画重点/强调时机），动画时机对齐口播实测时间戳；首 1.5s 必须有 pop/zoom 级动效（完播率生死线）；一幕文字块≤2
 - **时长超了怎么办**：实长超目标 30%+ 时先精简稿子重合成，不要硬压停顿；retime 会打印空档预算告警（最小空档 <0.25s = 节奏偏赶），照告警处理
 - **分段稿口播友好**：数字读慢是正常的；长句拆段，别一段塞三句
 - **画面 = 内容，不是装饰**：信息卡直接放结论/数据/截图，每场景一个主张；`.a data-d` 依次入场
