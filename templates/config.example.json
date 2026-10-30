@@ -12,9 +12,9 @@
     "limiter": 0.95
   },
   "tts": {
-    "model": "speech-2.8-hd",
+    "model": null,
     "speed": 1.15,
-    "voice_id": "female-shaonv",
+    "voice_id": null,
     "volume": 3.0,
     "language_boost": "Chinese",
     "text_normalization": true,

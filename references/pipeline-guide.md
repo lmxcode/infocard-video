@@ -31,8 +31,8 @@ voice_meta ──subgen──▶ subs.ass ──ffmpeg ass 烧录──▶ outpu
 ### config.json · tts
 | 字段 | 说明 |
 |---|---|
-| `model` | `speech-2.8-hd`（质量优先）/ `speech-2.8-turbo`（便宜快） |
-| `voice_id` | MiniMax 系统音色（如 `female-shaonv`）或你的克隆音色 ID |
+| `model` | 留 `null` = 读 env `MINIMAX_TTS_MODEL`（推荐）；可选 `speech-2.8-hd`（质量优先）/ `speech-2.8-turbo`（便宜快） |
+| `voice_id` | 留 `null` = 读 env `MINIMAX_VOICE_ID`（推荐，账号音色自动生效）。**别把具体音色写死进 config**，只有多音色需求才显式写；可选 MiniMax 系统音色（如 `female-shaonv`）或克隆音色 ID |
 | `speed` | 0.5-2.0；数字多的口播建议 1.15（再快数字含糊） |
 | `pronunciation_dict.tone` | 多音字/缩写注音，如 `"API/(A)(P)(I)"`、`"长/(chang2)"` |
 | `language_boost: "Chinese"` | 防止缩写被当英文逐字母拼读 |

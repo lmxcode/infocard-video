@@ -5,7 +5,7 @@ display_name_en: Infocard Short-Video Pipeline
 description: 信息卡短视频全自动流水线 Skill。当用户要「做一条短视频 / 把这篇稿子做成视频 / 口播视频 / 配音视频 / 竖版视频 / 抖音视频 / 视频成片 / 自动字幕 / 自动配音 / TTS 口播 / 克隆音色做视频 / 加 BGM / 数据讲解视频 / 账单视频 / 教程视频 / 科普解说视频 / 数字滚动动画 / 图文转视频」时使用——即使用户没说「信息卡」三个字，只要是文字稿→带配音字幕的成片需求就该用本技能。输入一段口播稿或主题 → 全自动八步产出 1080×1920 竖版成片（16:9 等其他比例改 config width/height 即可）：分段脚本 → 逐段 TTS 口播（MiniMax，支持克隆音色）→ 按实测时长重排切点 → 无头浏览器逐帧渲染信息卡画面（HTML/CSS 品牌风，数据动画+真实截图，不用素材库不烧生成模型）→ 和弦垫底 BGM（切点自动落音效）→ 混音 → ASS 字幕烧录 → 自动质检（时间线/成片/音量 9 项）。仅依赖 Python 标准库 + ffmpeg + 本机 Edge/Chrome；现金成本 ≈ 0（仅 TTS 按字符计费，自动记账）。
 description_en: Fully automated 1080x1920 portrait short-video pipeline. Input a voiceover script or topic, produce a finished video in seven steps: segmented script, per-segment MiniMax TTS (voice cloning supported), retime cuts from measured audio durations, headless-browser frame-by-frame rendering of HTML/CSS infocard scenes (brand-styled data animations and real screenshots, no stock footage, no generative video models), chord-pad BGM, audio mixing, and ASS subtitle burn-in. Requires only Python stdlib, ffmpeg, and a local Edge/Chrome.
 category: 视频
-version: 1.0.4
+version: 1.0.5
 author: 梦幻青山的AI说
 agent_created: true
 ---
@@ -52,6 +52,7 @@ agent_created: true
 
 ## agent 执行要点（实测踩出来的）
 
+- **音色与模型来源（铁律）**：账号音色和 TTS 模型从环境变量 `MINIMAX_VOICE_ID` / `MINIMAX_TTS_MODEL` 读取（config 里 tts.voice_id / tts.model 留 **null** 即可，脚本自动回退到 env）。**永远不要把某个具体音色名写进 config 或模板**——2026-10-30 C1 实测坑：config.example 写死 female-shaonv，短路了 env 回退，成片音色错了整整一条，重做全流程。只有用户明确要多音色才在 config 显式写
 - **时长必须实测**：TTS 实测时长可比推演长 30%+。先 gen_voice 再 retime，永远不要先手排切点
 - **时长超了怎么办**：实长超目标 30%+ 时先精简稿子重合成，不要硬压停顿；retime 会打印空档预算告警（最小空档 <0.25s = 节奏偏赶），照告警处理
 - **分段稿口播友好**：数字读慢是正常的；长句拆段，别一段塞三句
