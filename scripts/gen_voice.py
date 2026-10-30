@@ -112,6 +112,18 @@ def main():
     all_fit = True
     synthed = []  # 本次实际重新合成的段（计费用）；reuse 的不重复计费
 
+    # 复用指纹：text+voice_id+model+speed+pron 任一变化都必须重合成。
+    # 2026-10-30 实测坑：早期版本只看「mp3 存在 + reuse 标记」，换音色后被当缓存
+    # 命中静默跳过，成片还是旧音色。指纹存 voice_fp.json，与 mp3 同生命周期。
+    import hashlib
+    fp_path = here / "voice_fp.json"
+    fps = json.loads(fp_path.read_text(encoding="utf-8")) if fp_path.exists() else {}
+
+    def voice_fp(seg, cfg_tts: dict) -> str:
+        raw = json.dumps([seg.get("text"), cfg_tts.get("voice_id"), cfg_tts.get("model"),
+                          cfg_tts.get("speed", 1.15), seg.get("pron")], ensure_ascii=False)
+        return hashlib.md5(raw.encode("utf-8")).hexdigest()
+
     def billed_chars(t: str) -> int:
         # MiniMax 口径：1 汉字=2 字符，ASCII/标点=1 字符
         return sum(2 if ord(c) > 127 else 1 for c in t)
@@ -122,8 +134,9 @@ def main():
         win = seg.get("window")
         mp3 = vdir / f"{name}.mp3"
 
-        if mp3.exists() and seg.get("reuse", False):
-            # 已存在则直接读旧文件时长（ffprobe）
+        fp = voice_fp(seg, cfg.get("tts", {}))
+        if mp3.exists() and seg.get("reuse", False) and fps.get(name) == fp:
+            # 已存在且指纹一致才读旧文件时长（ffprobe）
             import subprocess
             r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                                 "-of", "csv=p=0", str(mp3)], capture_output=True, text=True)
@@ -132,6 +145,7 @@ def main():
         else:
             r = synth_one(text, mp3, cfg.get("tts", {}), extra_pron=seg.get("pron"))
             dur_ms = r["duration_ms"]
+            fps[name] = fp
             synthed.append((name, billed_chars(text)))
             print(f"{name} synth {dur_ms}ms", flush=True)
 
@@ -148,6 +162,7 @@ def main():
 
     out = here / "voice_meta.json"
     out.write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+    fp_path.write_text(json.dumps(fps, ensure_ascii=False, indent=1), encoding="utf-8")
 
     # 计费记账：逐次累加到 tts_billing.json（单价见 MiniMax 定价页：hd 3.5 元/万字符，turbo 2 元/万字符）
     if synthed:
