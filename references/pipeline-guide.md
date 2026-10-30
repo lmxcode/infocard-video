@@ -98,5 +98,6 @@ voice_meta ──subgen──▶ subs.ass ──ffmpeg ass 烧录──▶ outpu
 - `bgm.cut_fx`：`"thud"`（默认，每个内部切点落一记闷响）/ `"full"`（thud+切换前 0.45s 呼啸）/ `"none"`
 - `bgm.bpm`：给了就走节拍网格（beat=60/bpm），底鼓踩格子
 - 母带：归一化后 tanh 软限幅再归一 0.85——防削波爆音
-- 多比例：`width/height` 本来就是参数；16:9 用 1920×1080，场景排版需同步改
+- 多比例（v1.0.6）：模板尺寸抽成 `:root{--vw:--vh}` 两个变量；横版 16:9 → `--vw:1920px;--vh:1080px` + config `width/height` 1920×1080 + 场景布局改左右两栏 + 字号降一档（64→52 级）。渲染/混音/QA 脚本零改动
+- 运动模糊（v1.0.6）：模板 JS 给入场元素按 `(1-ease进度)×1.4px`、淡出旧场景按 `(1-opacity)×1.6px` 自动加 blur——纯函数确定性渲染，同一 t 永远同一帧；要调柔适度改这两个系数
 - `retime.py` v1.0.3 同步四处：segments.json、voice_meta.json、config.json、html cuts——不再有两套切点

@@ -14,13 +14,20 @@
 
   使用：复制本文件为 anim.html，改掉 {{BRAND}} 和场景内容，删掉多余场景，
   让 .scene 的数量 = cuts 数组长度 - 1。
+
+  v1.0.6 新增（anatomy 家族调研 P2 项落地）：
+  - 自适应运动模糊：元素入场/场景淡出时按进度自动加 blur，硬切变柔和过渡，无需手工配置
+  - 多比例：尺寸抽成 :root 的 --vw/--vh 两个变量，改横版只动这两处 + config.json 的 width/height
 -->
 <html>
 <head>
 <meta charset="utf-8">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{width:1080px;height:1920px;background:#FAF7F2;
+/* 尺寸：竖版 1080×1920；改横版 16:9 → --vw:1920px;--vh:1080px，同时 config.json 改 width/height，
+   布局把 flex 纵排改两栏（左右分栏），字号降一档（64→52 级） */
+:root{--vw:1080px;--vh:1920px}
+body{width:var(--vw);height:var(--vh);background:#FAF7F2;
  color:#2A2622;font-family:'Microsoft YaHei','PingFang SC',sans-serif;overflow:hidden;position:relative}
 .tag{position:absolute;top:96px;left:72px;font-size:34px;letter-spacing:6px;color:#C96442;font-weight:600}
 .foot{position:absolute;bottom:200px;left:0;right:0;text-align:center;font-size:26px;color:#A8A29A;letter-spacing:3px;opacity:.6}
@@ -92,6 +99,8 @@ scenes.forEach((s,k)=>{
   if(k===si)op=1;
   else if(k===si-1&&si>0)op=Math.max(0,1-(t-cuts[si])/0.35);
   s.style.opacity=op.toFixed(3);
+  /* 自适应运动模糊：淡出的旧场景按淡出进度加 blur（纯函数，同 t 同帧） */
+  s.style.filter=(k===si-1&&op<1&&op>0)?`blur(${((1-op)*1.6).toFixed(2)}px)`:'';
   if(k===si){
     s.querySelectorAll('.a').forEach(el=>{
       const d=parseFloat(el.dataset.d||'0');
@@ -99,6 +108,8 @@ scenes.forEach((s,k)=>{
       const e=ease3(p);
       el.style.opacity=e.toFixed(3);
       el.style.transform=`translateY(${((1-e)*44).toFixed(1)}px)`;
+      /* 入场位移期间加同源 blur：位移 44px 对应 ≈1.4px，越大越糊，到位即清 */
+      el.style.filter=e<1?`blur(${((1-e)*1.4).toFixed(2)}px)`:'';
     });
   }
 });
